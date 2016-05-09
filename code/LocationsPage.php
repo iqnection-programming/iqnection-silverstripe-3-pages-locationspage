@@ -20,12 +20,13 @@
 			"LocationsPage" => "LocationsPage"
 		); 		
 		
-        public function getCMSFields()
+		public function getCMSFields()
         {
-			return new FieldList(
-				new TextField("Title", "Location Title"),
-				new TextField("Address", "Location Address")
-			);
+			$fields = parent::getCMSFields();
+			$fields->push( new HiddenField('SortOrder',null,$fields->dataFieldByName('SortOrder')->Value()) );
+			$fields->push( new HiddenField('MapLatitude',null,$fields->dataFieldByName('MapLatitude')->Value()) );
+			$fields->push( new HiddenField('MapLongitude',null,$fields->dataFieldByName('MapLongitude')->Value()) );
+			return $fields;
         }
 		
 		public function getLocation($address=false){
@@ -89,7 +90,7 @@
 		public function getCMSFields()
 		{
 			$fields = parent::getCMSFields();
-			$fields->addFieldToTab("Root.Content.MapDetails", new DropdownField("MapType", "Map Display Type", array("ROADMAP"=>"Roadmap","SATELLITE"=>"Satellite","HYBRID"=>"Hybrid","TERRAIN"=>"Terrain"),"Roadmap"));
+			$fields->addFieldToTab("Root.MapDetails", new DropdownField("MapType", "Map Display Type", array("ROADMAP"=>"Roadmap","SATELLITE"=>"Satellite","HYBRID"=>"Hybrid","TERRAIN"=>"Terrain"),"Roadmap"));
 			$locations_config = GridFieldConfig::create()->addComponents(				
 				new GridFieldSortableRows('SortOrder'),
 				new GridFieldToolbarHeader(),
@@ -101,8 +102,8 @@
 				new GridFieldDeleteAction(),
 				new GridFieldDetailForm()				
 			);
-			$fields->addFieldToTab('Root.Content.MapDetails', new GridField('Locations','Locations',$this->Locations(),$locations_config));
-			$fields->addFieldToTab("Root.Content.MapDetails", new CheckboxField("MapDirections", "Display Directions Widget?"));
+			$fields->addFieldToTab('Root.MapDetails', new GridField('Locations','Locations',$this->Locations(),$locations_config));
+			$fields->addFieldToTab("Root.MapDetails", new CheckboxField("MapDirections", "Display Directions Widget?"));
 			return $fields;
 		}			
 	}
