@@ -30,7 +30,7 @@
         }
 		
 		public function getLocation($address=false){
-			$google = "http://maps.google.com/maps/api/geocode/json?sensor=false&address=";
+			$google = "https://maps.google.com/maps/api/geocode/json?sensor=false&address=";
 			$url = $google.urlencode($address);
 			
 			$resp_json = $this->curl_file_get_contents($url);
@@ -118,7 +118,7 @@
 		
 		public function init()
 		{
-			Requirements::javascript("http://maps.googleapis.com/maps/api/js?key=AIzaSyAXy4BLGXyLMakRQbrMVrFxS2KiXSj51cM&sensor=false");
+			Requirements::javascript("https://maps.googleapis.com/maps/api/js?key=AIzaSyAXy4BLGXyLMakRQbrMVrFxS2KiXSj51cM&sensor=false");
 			parent::init();
 		}
 		
