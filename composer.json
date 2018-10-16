@@ -1,19 +1,29 @@
 {
 	"name": "iqnection-pages/locationspage",
-	"description": "SilverStripe 3 Locations Page",
-	"type": "silverstripe-module",
+	"description": "SilverStripe Locations Page",
+	"type": "silverstripe-vendormodule",
 	"keywords": ["iqnection","pages"],
 	"authors": [
 		{
 			"name": "IQnection",
-            "homepage": "http://www.iqnection.com"
+            "homepage": "https://www.iqnection.com"
 		}
 	],
 	"require": {
-		"silverstripe/framework": ">=3.0",
-		"iqnection-pages/basepages":"*"
+		"silverstripe/framework": "^4.1",
+		"undefinedoffset/sortablegridfield": "*",
+		"iqnection-pages/basepages":"^2.0"
 	},
 	"extra": {
-		"installer-name": "iq-locationspage"
+		"expose": [
+			"css",
+			"images",
+			"javascript"
+		]
+	},
+	"autoload": {
+		"psr-4": {
+			"IQnection\\LocationsPage\\": "app/src/"
+		}
 	}
 }
