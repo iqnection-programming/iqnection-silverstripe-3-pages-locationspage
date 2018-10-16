@@ -44,8 +44,13 @@ var bounds;
 	}
 	
 	window.getDirections = function(){
+		$("#directions_ajax").empty();
 		$.ajax({
-			url: PageLink+"directions/"+$('#to_address').val()+"/"+$('#from_address').val(),
+			url: PageLink+"_directions/",
+			data: {
+				'to': $('#to_address').val(),
+				'from': $('#from_address').val()
+			},
 			global: false,
 			dataType: "html",
 			async: true,

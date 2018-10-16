@@ -9,16 +9,21 @@ use SilverStripe\Control\Director;
 class LocationsPageController extends \PageController
 {	
 	private static $allowed_actions = array(
-		"directions",
-		"printview"			
-	);	
+		"_directions",
+		'_printview',
+		'printview'
+	);
+	
+	private static $url_handlers = [
+		'_printview' => 'printview'
+	];
 	
 	public function init()
 	{
-		$gMapsApiUrl = "https://maps.googleapis.com/maps/api/js?sensor=false";
+		$gMapsApiUrl = "https://maps.googleapis.com/maps/api/js?";
 		if ($key = SiteConfig::current_site_config()->GoogleMapsApiKey)
 		{
-			$gMapsApiUrl .= "&key=".$key;
+			$gMapsApiUrl .= "key=".$key;
 		}
 		Requirements::javascript($gMapsApiUrl);
 		parent::init();
@@ -29,7 +34,7 @@ class LocationsPageController extends \PageController
 		$js = parent::CustomJS();
 		$js .= "var MapType = '".$this->MapType."';";
 		$addresses = [];
-		foreach($locations as $key => $l)
+		foreach($this->Locations() as $key => $l)
 		{
 			$addresses[$key] = [
 				'Title' => $l->Title,
@@ -50,7 +55,7 @@ class LocationsPageController extends \PageController
 		$TotalLat = 0;
 		$TotalLong = 0;
 		$Total = 0;
-		foreach($locations as $l)
+		foreach($this->Locations() as $l)
 		{
 			$TotalLat += $l->Latitude;
 			$TotalLong += $l->Longitude;
@@ -65,13 +70,23 @@ class LocationsPageController extends \PageController
 	
 	public function directionsAPI()
 	{
-		$to_addy = urlencode($this->request->param('ID'));
-		$from_addy = urlencode($this->request->param('OtherID'));
-		$gMapsApiUrl = "http://maps.googleapis.com/maps/api/directions/json?origin=".$from_addy."&destination=".$to_addy."&sensor=false";
+		if (!$to_addy = urlencode($this->request->getVar('to')))
+		{
+			return "I don't have a destination'";
+		}
+		if (!$from_addy = urlencode($this->request->getVar('from')))
+		{
+			return "I don't have a starting location";
+		}
+		$params = [
+			'origin' => preg_replace('/\W/','+',$from_addy),
+			'destination' => preg_replace('/\W/','+',$to_addy)
+		];
 		if ($key = SiteConfig::current_site_config()->GoogleMapsApiKey)
 		{
-			$gMapsApiUrl .= "&key=".$key;
+			$params["key"] = $key;
 		}
+		$gMapsApiUrl = "https://maps.googleapis.com/maps/api/directions/json?".http_build_query($params);
 		$rows = file_get_contents($gMapsApiUrl,0,null,null);
 		$directions_output = json_decode($rows, true);
 		$ajax_data = false;
@@ -93,8 +108,8 @@ class LocationsPageController extends \PageController
 				"Distance" => $data['distance']['text'],
 				"Duration" => $data['duration']['text'],
 				"GoogleLink" => "https://maps.google.com/maps?q=".$from_addy."+to+".$to_addy,
-				"PrintLink" => $this->AbsoluteLink()."printview/".$from_addy."/".$to_addy,
-				"PageLink" => $this->AbsoluteLink()."directions/".$from_addy."/".$to_addy,
+				"PrintLink" => $this->AbsoluteLink()."_printview/?from=".$from_addy."&to=".$to_addy,
+				"PageLink" => $this->AbsoluteLink()."_directions/?from=".$to_addy."&to=".$from_addy,
 				"Steps" => $steps
 			);
 		}
@@ -102,13 +117,13 @@ class LocationsPageController extends \PageController
 		return $ajax_data;
 	}
 	
-	public function directions()
+	public function _directions()
 	{
 		$ajax_data = $this->directionsAPI();
 		
 		if($ajax_data)
 		{
-			return Director::is_ajax() ? $this->Customise($ajax_data)->renderWith("LocationsPage/Includes/directions") : $this->Customise($ajax_data);
+			return Director::is_ajax() ? $this->Customise($ajax_data)->renderWith("IQnection/LocationsPage/Includes/directions") : $this->Customise($ajax_data);
 		} 
 		else 
 		{
@@ -118,9 +133,10 @@ class LocationsPageController extends \PageController
 	
 	public function printview()
 	{
+		Requirements::customScript("window.print();window.close()");
 		$ajax_data = $this->directionsAPI();
 		
-		if($ajax_data)
+		if ($ajax_data)
 		{
 			return $this->Customise($ajax_data);
 		} 

@@ -1,3 +1,4 @@
+<!-- template LocationsPage/Layout/LocationsPage.ss -->
 <h1>$Title</h1>
 
 <% if $Locations.Count %>
